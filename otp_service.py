@@ -14,12 +14,13 @@ def is_otp_match(user_otp, otp):
     return hmac.compare_digest(user_otp, otp)
 
 
-def verify_otp_with_attempts(otp):
+def verify_otp_with_attempts(otp, phone, show_demo_otp=True):
     end_time = time.time() + OTP_VALID_SECONDS
     attempts = 0
+    status_text = f"Demo OTP: {otp}" if show_demo_otp else "OTP sent to your number."
 
     while attempts < MAX_ATTEMPTS:
-        user_otp = input_otp_with_deadline(end_time)
+        user_otp = input_otp_with_deadline(end_time, phone, status_text)
 
         if user_otp is None:
             return "expired"
@@ -28,21 +29,12 @@ def verify_otp_with_attempts(otp):
         left = MAX_ATTEMPTS - attempts
 
         if not user_otp:
-            if left > 0:
-                print(f"OTP cannot be empty. Attempts left: {left}")
-            else:
-                print("OTP cannot be empty. Attempts left: 0")
+            status_text = f"OTP cannot be empty. Attempts left: {left}"
         elif len(user_otp) != OTP_LENGTH or not user_otp.isdigit():
-            if left > 0:
-                print(f"OTP must be {OTP_LENGTH} digits. Attempts left: {left}")
-            else:
-                print(f"OTP must be {OTP_LENGTH} digits. Attempts left: 0")
+            status_text = f"OTP must be {OTP_LENGTH} digits. Attempts left: {left}"
         elif is_otp_match(user_otp, otp):
             return "success"
         else:
-            if left > 0:
-                print(f"Invalid OTP. Attempts left: {left}")
-            else:
-                print("Invalid OTP. Attempts left: 0")
+            status_text = f"Invalid OTP. Attempts left: {left}"
 
     return "locked"

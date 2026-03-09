@@ -1,40 +1,37 @@
+from input_handler import input_mobile_with_panel, input_yes_no_with_panel
 from otp_service import generate_otp, verify_otp_with_attempts
+from ui import show_prompt_panel
 from validators import is_valid_mobile_number
 
 
-print("OTP Secure System Started")  # Start message
-
+mobile_status = ""
 while True:  # Keep asking until mobile number is valid
-    phone = input("Enter mobile number: ").strip()  # Ask mobile number
+    phone = input_mobile_with_panel("Enter mobile number:", mobile_status)  # Ask mobile number
     if is_valid_mobile_number(phone):  # Validate phone with extra fake-number checks
         break  # Exit loop when valid number is entered
-    print("Please enter a valid mobile number")  # Empty/invalid phone input
+    mobile_status = "Please enter a valid mobile number"
 
 otp = generate_otp()  # Generate secure random OTP
-print("OTP sent to", phone, ":", otp)  # Show OTP for demo
-result = verify_otp_with_attempts(otp)  # First OTP verification flow
+result = verify_otp_with_attempts(otp, phone, show_demo_otp=True)  # First OTP verification flow
 
 if result == "success":  # Login success
-    print("Login Successful")  # Correct OTP
+    show_prompt_panel(phone, "Session Complete", "", "Login Successful")
 elif result == "locked":  # Too many attempts
-    print("Account locked")  # Lock message
+    show_prompt_panel(phone, "Session Complete", "", "Account locked")
 else:
-    print("Time limit reached resend OTP?")  # Expiry message
-    resend_choice = input("Type yes or no: ").strip().lower()  # Ask resend option
+    resend_choice = input_yes_no_with_panel(phone, "Time limit reached. Resend OTP? (yes/no)")
 
     if resend_choice == "yes":  # Resend requested
         otp = generate_otp()  # Generate new OTP
-        print("New OTP sent to", phone, ":", otp)  # Show new OTP for demo
-        result = verify_otp_with_attempts(otp)  # Verify new OTP
+        result = verify_otp_with_attempts(otp, phone, show_demo_otp=True)  # Verify new OTP
 
         if result == "success":  # New OTP correct
-            print("Login Successful")  # Login success
+            show_prompt_panel(phone, "Session Complete", "", "Login Successful")
         elif result == "locked":  # Too many tries on new OTP
-            print("Account locked")  # Lock message
+            show_prompt_panel(phone, "Session Complete", "", "Account locked")
         else:
-            print("OTP expired again")  # New OTP expired too
+            show_prompt_panel(phone, "Session Complete", "", "OTP expired again")
     elif resend_choice == "no":  # User does not want resend
-        print("Session ended")  # Session is closed when user skips resend
-        print("Have a nice day!!")  # Exit message
+        show_prompt_panel(phone, "Session Complete", "", "Session ended. Have a nice day!!")
     else:
-        print("Invalid choice. Type yes or no.")  # Wrong yes/no input
+        show_prompt_panel(phone, "Session Complete", "", "Invalid choice. Type yes or no.")
