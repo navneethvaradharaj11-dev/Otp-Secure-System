@@ -19,7 +19,16 @@ if result == "success":  # Login success
 elif result == "locked":  # Too many attempts
     show_prompt_panel(phone, "Session Complete", "", "Account locked")
 else:
-    resend_choice = input_yes_no_with_panel(phone, "Time limit reached. Resend OTP? (yes/no)")
+    resend_status = "Type yes or no, then press Enter."
+    while True:
+        resend_choice = input_yes_no_with_panel(
+            phone,
+            "Time limit reached. Resend OTP? (yes/no)",
+            resend_status,
+        )
+        if resend_choice in {"yes", "no"}:
+            break
+        resend_status = "Invalid choice. Please type only yes or no."
 
     if resend_choice == "yes":  # Resend requested
         otp = generate_otp()  # Generate new OTP
@@ -33,5 +42,3 @@ else:
             show_prompt_panel(phone, "Session Complete", "", "OTP expired again")
     elif resend_choice == "no":  # User does not want resend
         show_prompt_panel(phone, "Session Complete", "", "Session ended. Have a nice day!!")
-    else:
-        show_prompt_panel(phone, "Session Complete", "", "Invalid choice. Type yes or no.")
