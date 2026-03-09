@@ -48,7 +48,12 @@ python main.py
 ```
 otp-secure-system/
 │
-├── main.py
+├── main.py              # Application entry point
+├── config.py            # Configuration constants
+├── otp_service.py       # OTP generation and verification
+├── validators.py        # Mobile number validation
+├── input_handler.py     # Timer and OTP input handling
+├── requirements.txt     # Project dependencies
 └── README.md
 ```
 
