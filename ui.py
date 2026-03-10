@@ -1,50 +1,51 @@
 import os
 import atexit
 
-BOX_WIDTH = 55
+BOX_WIDTH = 74
 INNER_WIDTH = BOX_WIDTH - 2
 _last_rendered_lines = 0
 _cursor_hidden = False
 
 
-def clear_screen():
+def clear_screen() -> None:
+    """Clear terminal screen."""
     os.system("cls" if os.name == "nt" else "clear")
 
 
-def _hide_cursor():
+def _hide_cursor() -> None:
     global _cursor_hidden
     if not _cursor_hidden:
         print("\x1b[?25l", end="", flush=True)
         _cursor_hidden = True
 
 
-def _show_cursor():
+def _show_cursor() -> None:
     global _cursor_hidden
     if _cursor_hidden:
         print("\x1b[?25h", end="", flush=True)
         _cursor_hidden = False
 
 
-def _line(content=""):
+def _line(content: str = "") -> str:
     text = content[:INNER_WIDTH].ljust(INNER_WIDTH)
     return f"|{text}|"
 
 
-def _center(text=""):
+def _center(text: str = "") -> str:
     return _line(text.center(INNER_WIDTH))
 
 
-def _otp_slots(otp_text, otp_length):
+def _otp_slots(otp_text: str, otp_length: int) -> str:
     chars = list(otp_text[:otp_length])
     chars.extend(["_"] * (otp_length - len(chars)))
     return " ".join(chars)
 
 
-def _fit(text):
+def _fit(text: str) -> str:
     return text[:INNER_WIDTH]
 
 
-def _draw_panel(panel_text):
+def _draw_panel(panel_text: str) -> None:
     global _last_rendered_lines
     line_count = panel_text.count("\n") + 1
     _hide_cursor()
@@ -58,13 +59,21 @@ def _draw_panel(panel_text):
     _last_rendered_lines = line_count
 
 
-def end_panel_render():
+def end_panel_render() -> None:
     global _last_rendered_lines
     _last_rendered_lines = 0
     _show_cursor()
 
 
-def render_otp_panel(phone, otp_text, remaining_seconds, otp_length, helper_text="", status_text=""):
+def render_otp_panel(
+    phone: str,
+    otp_text: str,
+    remaining_seconds: int,
+    otp_length: int,
+    helper_text: str = "",
+    status_text: str = "",
+) -> str:
+    """Build OTP input panel text."""
     minutes = remaining_seconds // 60
     seconds = remaining_seconds % 60
 
@@ -86,12 +95,26 @@ def render_otp_panel(phone, otp_text, remaining_seconds, otp_length, helper_text
     return "\n".join(lines)
 
 
-def show_otp_panel(phone, otp_text, remaining_seconds, otp_length, helper_text="", status_text=""):
+def show_otp_panel(
+    phone: str,
+    otp_text: str,
+    remaining_seconds: int,
+    otp_length: int,
+    helper_text: str = "",
+    status_text: str = "",
+) -> None:
+    """Render OTP input panel."""
     panel = render_otp_panel(phone, otp_text, remaining_seconds, otp_length, helper_text, status_text)
     _draw_panel(panel)
 
 
-def render_prompt_panel(phone, prompt_text, input_text="", status_text=""):
+def render_prompt_panel(
+    phone: str,
+    prompt_text: str,
+    input_text: str = "",
+    status_text: str = "",
+) -> str:
+    """Build generic prompt panel text."""
     lines = [
         "+" + "-" * INNER_WIDTH + "+",
         _center("OTP Secure System"),
@@ -110,7 +133,13 @@ def render_prompt_panel(phone, prompt_text, input_text="", status_text=""):
     return "\n".join(lines)
 
 
-def show_prompt_panel(phone, prompt_text, input_text="", status_text=""):
+def show_prompt_panel(
+    phone: str,
+    prompt_text: str,
+    input_text: str = "",
+    status_text: str = "",
+) -> None:
+    """Render generic prompt panel."""
     panel = render_prompt_panel(phone, prompt_text, input_text, status_text)
     _draw_panel(panel)
 
