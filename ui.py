@@ -1,10 +1,17 @@
 import os
 import atexit
 
+if os.name == "nt":
+    os.system("")
+
 BOX_WIDTH = 74
 INNER_WIDTH = BOX_WIDTH - 2
 _last_rendered_lines = 0
 _cursor_hidden = False
+RESET = "\x1b[0m"
+RED = "\x1b[31m"
+GREEN = "\x1b[32m"
+CYAN = "\x1b[36m"
 
 
 def clear_screen() -> None:
@@ -26,8 +33,10 @@ def _show_cursor() -> None:
         _cursor_hidden = False
 
 
-def _line(content: str = "") -> str:
+def _line(content: str = "", color: str = "") -> str:
     text = content[:INNER_WIDTH].ljust(INNER_WIDTH)
+    if color:
+        return f"|{color}{text}{RESET}|"
     return f"|{text}|"
 
 
@@ -43,6 +52,17 @@ def _otp_slots(otp_text: str, otp_length: int) -> str:
 
 def _fit(text: str) -> str:
     return text[:INNER_WIDTH]
+
+
+def _status_color(status_text: str) -> str:
+    lowered = status_text.lower()
+    if any(word in lowered for word in ("incorrect", "invalid", "unable", "error", "expired", "locked", "missing")):
+        return RED
+    if any(word in lowered for word in ("successful", "verified", "approved")):
+        return GREEN
+    if status_text:
+        return CYAN
+    return ""
 
 
 def _draw_panel(panel_text: str) -> None:
@@ -87,7 +107,7 @@ def render_otp_panel(
         _line(_fit(f" Time Left     : {minutes:02d}:{seconds:02d}")),
         _line(),
         _line(_fit(f" {helper_text or 'Enter OTP digits, then press Enter.'}")),
-        _line(_fit(f" {status_text or 'Waiting for input...'}")),
+        _line(_fit(f" {status_text or 'Waiting for input...'}"), color=_status_color(status_text or "Waiting for input...")),
         _line(),
         _center("Verify OTP"),
         "+" + "-" * INNER_WIDTH + "+",
@@ -125,7 +145,7 @@ def render_prompt_panel(
         _line(),
         _line(_fit(f" {prompt_text}")),
         _line(_fit(f" Input         : {input_text}")),
-        _line(_fit(f" {status_text}")),
+        _line(_fit(f" {status_text}"), color=_status_color(status_text)),
         _line(),
         _center("Verify OTP"),
         "+" + "-" * INNER_WIDTH + "+",
