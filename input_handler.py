@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+from typing import Optional
 
 from config import OTP_LENGTH
 from ui import show_otp_panel, show_prompt_panel
@@ -13,7 +14,8 @@ else:
     import tty
 
 
-def input_otp_with_deadline(end_time, phone, status_text):
+def input_otp_with_deadline(end_time: float, phone: str, status_text: str) -> Optional[str]:
+    """Capture OTP input until Enter or until the deadline expires."""
     otp_text = ""
     last_remaining = -1
     last_otp_text = None
@@ -66,7 +68,12 @@ def input_otp_with_deadline(end_time, phone, status_text):
             termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old_settings)
 
 
-def input_yes_no_with_panel(phone, prompt_text, status_text="Type yes or no, then press Enter."):
+def input_yes_no_with_panel(
+    phone: str,
+    prompt_text: str,
+    status_text: str = "Type yes or no, then press Enter.",
+) -> str:
+    """Capture a yes/no style text input from the boxed terminal panel."""
     typed = ""
     last_typed = None
 
@@ -105,7 +112,11 @@ def input_yes_no_with_panel(phone, prompt_text, status_text="Type yes or no, the
             termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old_settings)
 
 
-def input_mobile_with_panel(prompt_text="Enter mobile number:", status_text=""):
+def input_mobile_with_panel(
+    prompt_text: str = "Enter mobile number:",
+    status_text: str = "",
+) -> str:
+    """Capture mobile input from the boxed terminal panel."""
     typed = ""
     last_typed = None
 
